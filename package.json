@@ -1,0 +1,20 @@
+{
+  "name": "building-angular",
+  "version": "0.0.1",
+  "description": "Learning how to build Angular from the ground up.",
+  "main": "index.js",
+  "scripts": {
+    "test": "karma start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jasonody/building-angular.git"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "jasmine-core": "^2.3.4",
+    "karma": "^0.13.3",
+    "karma-chrome-launcher": "^0.2.0",
+    "karma-jasmine": "^0.3.6"
+  }
+}

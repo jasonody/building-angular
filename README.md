@@ -1,2 +1,2 @@
 # building-angular
-Building Angular from scratch
+Learning how to build Angular from the ground up.
