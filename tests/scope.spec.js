@@ -416,5 +416,108 @@ describe('Scope', function () {
 			}, 50);
 		});
 		
+		it('allows async $apply with $applyAsync', function (done) {
+			
+			scope.counter = 0;
+			
+			scope.$watch(
+				function (scope) { return scope.aValue; },
+				function (newValue, oldValue, scope) { scope.counter++; }
+			);
+			
+			scope.$digest();
+			expect(scope.counter).toBe(1);
+			
+			scope.$applyAsync(function (scope) {
+				
+				scope.aValue = 'abc';
+			});
+			expect(scope.counter).toBe(1);
+			
+			setTimeout(function () {
+				
+				expect(scope.counter).toBe(2);
+				done();
+			}, 50);
+		});
+		
+		it('never executes $applyAsync\'ed function in the same cycle', function (done) {
+			
+			scope.aValue = [1, 2, 3];
+			scope.asyncApplied = false;
+			
+			scope.$watch(
+				function (scope) { return scope.aValue; },
+				function (newValue, oldValue, scope) {
+					
+					scope.$applyAsync(function (scope) {
+						
+						scope.asyncApplied = true;
+					});
+				}
+			);
+			
+			scope.$digest();
+			expect(scope.asyncApplied).toBe(false);
+			
+			setTimeout(function () {
+				
+				expect(scope.asyncApplied).toBe(true);
+				done();
+			}, 50);
+		});
+		
+		it('coalesces many calls to $applyAsync', function (done) {
+			
+			scope.counter = 0;
+			
+			scope.$watch(
+				function (scope) { 
+					
+					scope.counter++;
+					
+					return scope.aValue;
+				},
+				function (newValue, oldValue, scope) { }
+			);
+			
+			scope.$applyAsync(function (scope) { scope.aValue = 'abc'; });
+			scope.$applyAsync(function (scope) { scope.aValue = 'def'; });
+			
+			setTimeout(function () {
+				
+				expect(scope.counter).toBe(2);
+				done();
+			}, 50);
+		});
+		
+		it('cancels and flushes $applyAsync if digested first', function (done) {
+			
+			scope.counter = 0;
+			
+			scope.$watch(
+				function (scope) { 
+					
+					scope.counter++;
+					
+					return scope.aValue;
+				},
+				function (newValue, oldValue, scope) { }
+			);
+			
+			scope.$applyAsync(function (scope) { scope.aValue = 'abc'; });
+			scope.$applyAsync(function (scope) { scope.aValue = 'def'; });
+			
+			scope.$digest();
+			expect(scope.counter).toBe(2);
+			expect(scope.aValue).toBe('def');
+			
+			setTimeout(function () {
+				
+				expect(scope.counter).toBe(2);
+				done();
+			}, 50);
+		});
+				
 	});
 });
