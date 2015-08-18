@@ -15,6 +15,8 @@ function Scope() {
 
 Scope.prototype.$watch = function (watchFn, listenerFn, valueEq) {
 	
+	var self = this;
+	
 	var watcher = {
 		watchFn: watchFn,
 		listenerFn: listenerFn || function () { },
@@ -22,8 +24,17 @@ Scope.prototype.$watch = function (watchFn, listenerFn, valueEq) {
 		last: initWatchValue
 	};
 	
-	this.$$watchers.push(watcher);
+	this.$$watchers.unshift(watcher);
 	this.$$lastDirtyWatch = null;
+	
+	return function () {
+		
+		var index = self.$$watchers.indexOf(watcher);
+		if (index >= 0) {
+			self.$$watchers.splice(index, 1);
+			self.$$lastDirtyWatch = null; //prevent short-circuiting optimization when removing a $watch, p.61
+		}
+	};
 };
 
 Scope.prototype.$$digestOnce = function () {
@@ -31,24 +42,26 @@ Scope.prototype.$$digestOnce = function () {
 	var self = this;
 	var newValue, oldValue, dirty;
 	
-	this.$$watchers.some(function (watcher) {
-		try {
-			newValue = watcher.watchFn(self);
-			oldValue = watcher.last;
+	_.forEachRight(this.$$watchers, function (watcher) {
+		if (watcher) {
+			try {
+				newValue = watcher.watchFn(self);
+				oldValue = watcher.last;
 
-			if (!self.$$areEqual(newValue, oldValue, watcher.valueEq)) {
-				self.$$lastDirtyWatch = watcher;
+				if (!self.$$areEqual(newValue, oldValue, watcher.valueEq)) {
+					self.$$lastDirtyWatch = watcher;
 
-				watcher.last = (watcher.valueEq ? _.cloneDeep(newValue) : newValue);
-				watcher.listenerFn(newValue, 
-													 (oldValue === initWatchValue ? newValue : oldValue), 
-													 self);
-				dirty = true;
-			} else if (self.$$lastDirtyWatch === watcher) {
-				return true; //shortcircuit iteration over watchers (exits 'some' loop)
-			}
-		} catch (e) {
-			console.error(e);
+					watcher.last = (watcher.valueEq ? _.cloneDeep(newValue) : newValue);
+					watcher.listenerFn(newValue, 
+														 (oldValue === initWatchValue ? newValue : oldValue), 
+														 self);
+					dirty = true;
+				} else if (self.$$lastDirtyWatch === watcher) {
+					return false; //shortcircuit iteration over watchers (exits 'forEachRight' loop)
+				}
+			} catch (e) {
+				console.error(e);
+			}	
 		}
 	});
 	
