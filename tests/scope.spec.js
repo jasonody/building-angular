@@ -827,5 +827,52 @@ describe('Scope', function () {
 			});
 		});
 		
+		it('calls the listener once when the watch array is empty', function () {
+			
+			var gotNewValues, gotOldValues;
+			
+			scope.$watchGroup([], function (newValues, oldValues, scope) {
+				
+				gotOldValues = oldValues;
+				gotNewValues = newValues;
+			});
+			
+			scope.$digest();
+			expect(gotNewValues).toEqual([]);
+			expect(gotOldValues).toEqual([]);
+		});
+		
+		it('can be deregistered', function () {
+			
+			scope.counter = 0;
+			scope.aValue = 1;
+			scope.anotherValue = 2
+			
+			var destroyGroup = scope.$watchGroup([
+				function (scope) { return scope.aValue; },
+				function (scope) { return scope.anotherValue; }
+			], function (newValues, oldValues, scope) { scope.counter++; });
+			
+			scope.$digest();
+			
+			scope.anotherValue = 3;
+			destroyGroup();
+			scope.$digest();
+			expect(scope.counter).toBe(1);
+		});
+		
+		it('does not call the zero-watch listener when deregistered first', function () {
+			
+			scope.counter = 0;
+			
+			var destroyGroup = scope.$watchGroup([], 
+				function (newValues, oldValues, scope) { scope.counter++; });
+			
+			destroyGroup();
+			scope.$digest();
+			
+			expect(scope.counter).toBe(0);
+		});
+		
 	});
 });

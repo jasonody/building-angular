@@ -130,6 +130,7 @@ Scope.prototype.$apply = function (expr) {
 	
 	try {
 		this.$beginPhase('$apply');
+		
 		return this.$eval(expr);
 	} finally {
 		this.$clearPhase();
@@ -179,7 +180,9 @@ Scope.prototype.$applyAsync = function (expr) {
 	if (self.$$applyAsyncId === null) {
 		self.$$applyAsyncId = setTimeout(function () {
 
-			self.$apply(_.bind(self.$$flushApplyAsync, self));
+			self.$apply(function () {
+				self.$$flushApplyAsync();
+			}.bind(self));
 		}, 0);
 	}
 };
@@ -211,6 +214,23 @@ Scope.prototype.$watchGroup = function (watchFns, listenerFn) {
 	var changeReactionScheduled = false;
 	var firstRun = true;
 	
+	if (watchFns.length === 0) {
+		
+		var shouldCall = true;
+		
+		self.$evalAsync(function () {
+			
+			if (shouldCall) {
+				listenerFn(newValues, oldValues, self);	
+			}
+		});
+		
+		return function () {
+			
+			shouldCall = false;
+		};
+	};
+	
 	function watchGroupListener () { 
 	
 		if (firstRun) {
@@ -223,10 +243,10 @@ Scope.prototype.$watchGroup = function (watchFns, listenerFn) {
 		changeReactionScheduled = false;
 	};
 	
-	watchFns.forEach(function (watchFn, i) {
+	var destroyFns = watchFns.map(function (watchFn, i) {
 		
-		self.$watch(watchFn, function (newValue, oldValue) {
-			console.log(i);
+		return self.$watch(watchFn, function (newValue, oldValue) {
+			
 			newValues[i] = newValue;
 			oldValues[i] = oldValue;
 			
@@ -236,4 +256,12 @@ Scope.prototype.$watchGroup = function (watchFns, listenerFn) {
 			}
 		});
 	});
+	
+	return function () {
+		
+		destroyFns.forEach(function (destroyFn) {
+			
+			destroyFn();
+		});
+	};
 };
