@@ -265,3 +265,12 @@ Scope.prototype.$watchGroup = function (watchFns, listenerFn) {
 		});
 	};
 };
+
+Scope.prototype.$new = function () {
+	
+	var ChildScope = function () { };
+	ChildScope.prototype = this;
+	var child = new ChildScope();
+	
+	return child;
+};
