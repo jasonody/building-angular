@@ -10,6 +10,7 @@ function Scope() {
 	this.$$applyAsyncQueue = [];
 	this.$$applyAsyncId = null;
 	this.$$postDigestQueue = [];
+	this.$$children = [];
 	this.$$phase = null;
 }
 
@@ -39,30 +40,39 @@ Scope.prototype.$watch = function (watchFn, listenerFn, valueEq) {
 
 Scope.prototype.$$digestOnce = function () {
 	
+	var dirty;
+	var continueLoop = true;
 	var self = this;
-	var newValue, oldValue, dirty;
 	
-	_.forEachRight(this.$$watchers, function (watcher) {
-		if (watcher) {
-			try {
-				newValue = watcher.watchFn(self);
-				oldValue = watcher.last;
+	this.$$everyScope(function (scope) {
+		
+		var newValue, oldValue;
 
-				if (!self.$$areEqual(newValue, oldValue, watcher.valueEq)) {
-					self.$$lastDirtyWatch = watcher;
+		_.forEachRight(scope.$$watchers, function (watcher) {
+			if (watcher) {
+				try {
+					newValue = watcher.watchFn(scope);
+					oldValue = watcher.last;
 
-					watcher.last = (watcher.valueEq ? _.cloneDeep(newValue) : newValue);
-					watcher.listenerFn(newValue, 
-														 (oldValue === initWatchValue ? newValue : oldValue), 
-														 self);
-					dirty = true;
-				} else if (self.$$lastDirtyWatch === watcher) {
-					return false; //shortcircuit iteration over watchers (exits 'forEachRight' loop)
-				}
-			} catch (e) {
-				console.error(e);
-			}	
-		}
+					if (!scope.$$areEqual(newValue, oldValue, watcher.valueEq)) {
+						self.$$lastDirtyWatch = watcher;
+
+						watcher.last = (watcher.valueEq ? _.cloneDeep(newValue) : newValue);
+						watcher.listenerFn(newValue, 
+															 (oldValue === initWatchValue ? newValue : oldValue), 
+															 scope);
+						dirty = true;
+					} else if (self.$$lastDirtyWatch === watcher) {
+						continueLoop = false;
+						return false; //shortcircuit iteration over watchers (exits 'forEachRight' loop)
+					}
+				} catch (e) {
+					console.error(e);
+				}	
+			}
+		});
+		
+		return continueLoop;
 	});
 	
 	return dirty;
@@ -271,7 +281,21 @@ Scope.prototype.$new = function () {
 	var ChildScope = function () { };
 	ChildScope.prototype = this;
 	var child = new ChildScope();
+	this.$$children.push(child);
 	child.$$watchers = [];
+	child.$$children = [];
 	
 	return child;
+};
+
+Scope.prototype.$$everyScope = function (fn) {
+	
+	if (fn(this)) {
+		return this.$$children.every(function (child) {
+			
+			return child.$$everyScope(fn);
+		});
+	} else {
+		return false;
+	}
 };
