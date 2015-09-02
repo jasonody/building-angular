@@ -1020,7 +1020,7 @@ describe('Scope', function () {
 			expect(child2.$$children[0]).toBe(child2_1);
 		});
 		
-		fit('digests its children', function () {
+		it('digests its children', function () {
 			
 			var parent = new Scope();
 			var child = parent.$new();
@@ -1035,5 +1035,23 @@ describe('Scope', function () {
 			expect(child.aValueWas).toBe('abc');
 		});
 		
+		it('digests from root on $apply', function () {
+			
+			var parent = new Scope();
+			var child = parent.$new();
+			var child2 = parent.$new();
+			
+			parent.aValue = 'abc';
+			parent.counter = 0;
+			parent.$watch(
+				function (scope) { return scope.aValue; },
+				function (newValue, oldValue, scope) { scope.counter++; }
+			);
+			
+			child2.$apply(function (scope) { });
+			
+			expect(parent.counter).toBe(1);
+		});
+						
 	});
 });
