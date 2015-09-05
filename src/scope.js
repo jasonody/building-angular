@@ -277,11 +277,19 @@ Scope.prototype.$watchGroup = function (watchFns, listenerFn) {
 	};
 };
 
-Scope.prototype.$new = function () {
+Scope.prototype.$new = function (isolated) {
 	
-	var ChildScope = function () { };
-	ChildScope.prototype = this;
-	var child = new ChildScope();
+	var child;
+	
+	if (isolated) {
+		child = new Scope();
+		child.$root = this.$root;
+	} else {
+		var ChildScope = function () { };
+		ChildScope.prototype = this;
+		child = new ChildScope();
+	}
+	
 	this.$$children.push(child);
 	child.$$watchers = [];
 	child.$$children = [];
