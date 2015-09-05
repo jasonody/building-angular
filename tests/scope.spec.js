@@ -1133,7 +1133,7 @@ describe('Scope', function () {
 			expect(parent.counter).toBe(1);
 		});
 		
-		it('schedules a digest from roo on $evalAsync when isolated', function (done) {
+		it('schedules a digest from root on $evalAsync when isolated', function (done) {
 			
 			var parent = new Scope();
 			var child = parent.$new(true);
@@ -1153,6 +1153,38 @@ describe('Scope', function () {
 				expect(parent.counter).toBe(1);
 				done();
 			}, 50);
+		});
+		
+	it('executes $evalAsync functions on isolated scopes', function (done) {
+			
+			var parent = new Scope();
+			var child = parent.$new(true);
+			
+			child.$evalAsync(function (scope) {
+				
+				scope.didEvalAsync = true;
+			});
+			
+			setTimeout(function () {
+				
+				expect(child.didEvalAsync).toBe(true);
+				done();
+			}, 50);
+		});
+		
+		it('executes $$postDigest functions on isolated scopes', function () {
+			
+			var parent = new Scope();
+			var child = parent.$new(true);
+			
+			child.$$postDigest(function () {
+				
+				child.didPostDigest = true;
+			});
+			
+			parent.$digest();
+			
+			expect(child.didPostDigest).toBe(true);
 		});
 	});
 });
