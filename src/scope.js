@@ -88,7 +88,7 @@ Scope.prototype.$digest = function () {
 	this.$beginPhase('$digest');
 	
 	if (this.$$applyAsyncId) {
-		clearTimeout(this.$$applyAsyncId); //Cancel pending timeout to flush applyAsync queue
+		clearTimeout(this.$root.$$applyAsyncId); //Cancel pending timeout to flush applyAsync queue
 		this.$$flushApplyAsync(); //Flush applyAsync queue immediately
 	}
 	
@@ -188,8 +188,8 @@ Scope.prototype.$applyAsync = function (expr) {
 		self.$eval(expr);
 	});
 	
-	if (self.$$applyAsyncId === null) {
-		self.$$applyAsyncId = setTimeout(function () {
+	if (self.$root.$$applyAsyncId === null) {
+		self.$root.$$applyAsyncId = setTimeout(function () {
 
 			self.$apply(function () {
 				self.$$flushApplyAsync();
@@ -208,7 +208,7 @@ Scope.prototype.$$flushApplyAsync = function () {
 		}
 	}
 
-	this.$$applyAsyncId = null;
+	this.$root.$$applyAsyncId = null;
 };
 
 Scope.prototype.$$postDigest = function (fn) {
@@ -286,6 +286,7 @@ Scope.prototype.$new = function (isolated) {
 		child.$root = this.$root;
 		child.$$asyncQueue = this.$$asyncQueue;
 		child.$$postDigestQueue = this.$$postDigestQueue;
+		child.$$applyAsyncQueue = this.$$applyAsyncQueue;
 	} else {
 		var ChildScope = function () { };
 		ChildScope.prototype = this;
