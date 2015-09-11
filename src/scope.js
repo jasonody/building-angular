@@ -297,6 +297,7 @@ Scope.prototype.$new = function (isolated, parent) {
 	parent.$$children.push(child);
 	child.$$watchers = [];
 	child.$$children = [];
+	child.$parent = parent;
 	
 	return child;
 };
@@ -312,3 +313,16 @@ Scope.prototype.$$everyScope = function (fn) {
 		return false;
 	}
 };
+
+Scope.prototype.$destroy = function () {
+	
+	if (this.$parent) {
+		var siblings = this.$parent.$$children;
+		var indextOfThis = siblings.indexOf(this);
+		
+		if (indextOfThis >= 0) {
+			siblings.splice(indextOfThis, 1);
+		}
+		this.$$watchers = null;
+	}
+}
