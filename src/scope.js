@@ -337,11 +337,20 @@ Scope.prototype.$watchCollection = function (watchFn, listenerFn) {
 		
 		newValue = watchFn(scope);
 		
-		if (!self.$$areEqual(newValue, oldValue, false)) { //3rd arg indicates to use reference comparison
-			changeCount++;
+		if (_.isObject(newValue)) {
+			if(_.isArray(newValue)) {
+				if(!_.isArray(oldValue)) {
+					changeCount++;
+					oldValue = [];
+				}
+			}
+		} else { //everything else that isn't an object
+			if (!self.$$areEqual(newValue, oldValue, false)) { //3rd arg indicates to use reference comparison
+				changeCount++;
+			}
+
+			oldValue = newValue;
 		}
-		
-		oldValue = newValue;
 		
 		return changeCount;
 	};
