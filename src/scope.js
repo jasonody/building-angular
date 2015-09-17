@@ -343,6 +343,11 @@ Scope.prototype.$watchCollection = function (watchFn, listenerFn) {
 					changeCount++;
 					oldValue = [];
 				}
+				
+				if (newValue.length !== oldValue.length) {
+					changeCount++;
+					oldValue.length = newValue.length;
+				}
 			}
 		} else { //everything else that isn't an object
 			if (!self.$$areEqual(newValue, oldValue, false)) { //3rd arg indicates to use reference comparison
