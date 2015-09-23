@@ -338,7 +338,7 @@ Scope.prototype.$watchCollection = function (watchFn, listenerFn) {
 		newValue = watchFn(scope);
 		
 		if (_.isObject(newValue)) {
-			if(_.isArray(newValue)) {
+			if(_.isArrayLike(newValue)) {
 				if(!_.isArray(oldValue)) {
 					changeCount++;
 					oldValue = [];
