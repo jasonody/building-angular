@@ -358,17 +358,28 @@ Scope.prototype.$watchCollection = function (watchFn, listenerFn) {
 					}
 				});
 			} else {
+				//detect when an attribute becomes an object
 				if (!_.isObject(oldValue) || _.isArrayLike(oldValue)) {
 					changeCount++;
 					oldValue = {};
 				}
 				
+				//detect new or replaced attributes in objects
 				_.forOwn(newValue, function (newVal, key) {
 					
 					var bothNaN = _.isNaN(newVal) && _.isNaN(oldValue[key]);
 					if (!bothNaN && oldValue[key] !== newVal) {
 						changeCount++;
 						oldValue[key] = newVal;
+					}
+				});
+				
+				//detect removed attributes in objects
+				_.forOwn(oldValue, function (oldVal, key) {
+					
+					if (!newValue.hasOwnProperty(key)) {
+						changeCount++;
+						delete oldValue[key];
 					}
 				});
 			}
