@@ -357,6 +357,11 @@ Scope.prototype.$watchCollection = function (watchFn, listenerFn) {
 						oldValue[i] = newItem;
 					}
 				});
+			} else {
+				if (!_.isObject(oldValue) || _.isArrayLike(oldValue)) {
+					changeCount++;
+					oldValue = {};
+				}
 			}
 		} else { //everything else that isn't an object
 			if (!self.$$areEqual(newValue, oldValue, false)) { //3rd arg indicates to use reference comparison
