@@ -330,8 +330,9 @@ Scope.prototype.$destroy = function () {
 Scope.prototype.$watchCollection = function (watchFn, listenerFn) {
 	
 	var self = this;
-	var newValue, oldValue, oldLength;
+	var newValue, oldValue, oldLength, veryOldValue;
 	var changeCount = 0;
+	var trackVeryOldValue = (listenerFn.length > 1);
 	
 	var internalWatchFn = function (scope) {
 		
@@ -409,7 +410,11 @@ Scope.prototype.$watchCollection = function (watchFn, listenerFn) {
 	
 	var internalListenerFn = function () {
 		
-		listenerFn(newValue, oldValue, self);
+		listenerFn(newValue, veryOldValue, self);
+		
+		if (trackVeryOldValue) {
+			veryOldValue = _.clone(newValue);
+		}
 	};
 	
 	return this.$watch(internalWatchFn, internalListenerFn);
