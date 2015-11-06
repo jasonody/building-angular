@@ -447,22 +447,28 @@ Scope.prototype.$on = function (eventName, listener) {
 
 Scope.prototype.$emit = function (eventName) {
 	
-	var additionalArgs = _.rest(arguments);
+	var event = { name: eventName };
+	var listenerArgs = [event].concat(_.rest(arguments));
+	var scope = this;
+	do {
+		scope.$$fireEventOnScope(eventName, listenerArgs);
+		scope = scope.$parent;
+	} while (scope);
 	
-	return this.$$fireEventOnScope(eventName, additionalArgs);
+	return event;
 };
 
 Scope.prototype.$broadcast = function (eventName) {
 
-	var additionalArgs = _.rest(arguments);
+	var event = { name: eventName };
+	var listenerArgs = [event].concat(_.rest(arguments));
+	this.$$fireEventOnScope(eventName, listenerArgs);
 	
-	return this.$$fireEventOnScope(eventName, additionalArgs);
+	return event;
 };
 
-Scope.prototype.$$fireEventOnScope = function (eventName, additionalArgs) {
+Scope.prototype.$$fireEventOnScope = function (eventName, listenerArgs) {
 	
-	var event = { name: eventName };
-	var listenerArgs = [event].concat(additionalArgs);
 	var listeners = this.$$listeners[eventName] || [];
 	var i = 0;
 	
@@ -474,6 +480,4 @@ Scope.prototype.$$fireEventOnScope = function (eventName, additionalArgs) {
 			i++;
 		}
 	}
-	
-	return event;
 };
