@@ -1836,7 +1836,7 @@ describe('Scope', function () {
 			expect(scopeEvent).toBe(childEvent);
 		});
 		
-		fit('attaches targetScope on $emit', function () {
+		it('attaches targetScope on $emit', function () {
 			//targetScope is where the event was emitted from
 			
 			var scopeListener = jasmine.createSpy();
@@ -1851,7 +1851,7 @@ describe('Scope', function () {
 			expect(parentListener.calls.mostRecent().args[0].targetScope).toBe(scope);
 		});
 		
-		fit('attaches targetScope on $broadcast', function () {
+		it('attaches targetScope on $broadcast', function () {
 			//targetScope is where the event was emitted from
 
 			var scopeListener = jasmine.createSpy();
@@ -1864,6 +1864,78 @@ describe('Scope', function () {
 
 			expect(scopeListener.calls.mostRecent().args[0].targetScope).toBe(scope);
 			expect(childListener.calls.mostRecent().args[0].targetScope).toBe(scope);		
+		});
+		
+		it('attaches currentScope on $emit', function () {
+			//currentScope is where we currently are in the propagation
+			
+			var currentScopeOnScope, currentScopeOnParent;
+			var scopeListener = function (event) {
+				
+				currentScopeOnScope = event.currentScope;
+			};
+			var parentListener = function (event) {
+				
+				currentScopeOnParent = event.currentScope;
+			};
+			
+			scope.$on('someEvent', scopeListener);
+			parent.$on('someEvent', parentListener);
+			
+			scope.$emit('someEvent');
+			
+			expect(currentScopeOnScope).toBe(scope);
+			expect(currentScopeOnParent).toBe(parent);
+		});
+		
+		it('attaches currentScope on $broadcast', function () {
+			//currentScope is where we currently are in the propagation
+			
+			var currentScopeOnScope, currentScopeOnChild;
+			var scopeListener = function (event) {
+				
+				currentScopeOnScope = event.currentScope;
+			};
+			var childListener = function (event) {
+				
+				currentScopeOnChild = event.currentScope;
+			};
+			
+			scope.$on('someEvent', scopeListener);
+			child.$on('someEvent', childListener);
+			
+			scope.$broadcast('someEvent');
+			
+			expect(currentScopeOnScope).toBe(scope);
+			expect(currentScopeOnChild).toBe(child);
+		});
+		
+		it('sets currentScope to null after propagation on $emit', function () {
+			
+			var event;
+			var scopeListener = function (evt) {
+				
+				event = evt;
+			};
+			scope.$on('someEvent', scopeListener);
+			
+			scope.$emit('someEvent');
+			
+			expect(event.currentScope).toBe(null);
+		});
+		
+		it('sets currentScope to null after propagation on $broadcast', function () {
+			
+			var event;
+			var scopeListener = function (evt) {
+				
+				event = evt;
+			};
+			scope.$on('someEvent', scopeListener);
+			
+			scope.$broadcast('someEvent');
+			
+			expect(event.currentScope).toBe(null);
 		});
 	});
 });
