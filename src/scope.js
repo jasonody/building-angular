@@ -327,8 +327,10 @@ Scope.prototype.$destroy = function () {
 		if (indextOfThis >= 0) {
 			siblings.splice(indextOfThis, 1);
 		}
-		this.$$watchers = null;
 	}
+	
+	this.$$watchers = null;
+	this.$$listeners = {};
 };
 
 Scope.prototype.$watchCollection = function (watchFn, listenerFn) {
