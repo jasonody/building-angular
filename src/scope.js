@@ -322,7 +322,7 @@ Scope.prototype.$destroy = function () {
 	
 	if (this.$parent) {
 		var siblings = this.$parent.$$children;
-		var indextOfThis = siblings.indexOf(this);
+		var indexOfThis = siblings.indexOf(this);
 		
 		if (indextOfThis >= 0) {
 			siblings.splice(indextOfThis, 1);
@@ -510,7 +510,11 @@ Scope.prototype.$$fireEventOnScope = function (eventName, listenerArgs) {
 		if (listeners[i] === null) {
 			listeners.splice(i, 1);
 		} else {
-			listeners[i].apply(null, listenerArgs);
+			try {
+				listeners[i].apply(null, listenerArgs);
+			} catch (e) {
+				console.error(e);
+			}
 			i++;
 		}
 	}
