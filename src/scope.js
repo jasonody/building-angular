@@ -1,6 +1,20 @@
 'use strict';
 
+var _ = require('lodash');
+
 function initWatchValue() { }
+
+function isArrayLike (obj) { 
+
+	if (_.isNull(obj) || _.isUndefined(obj)) {
+		return false;
+	}
+
+	var length = obj.length;
+
+	return (length === 0 ||
+					(_.isNumber(length) && length > 0 && (length - 1) in obj));
+}
 
 function Scope() {
 	
@@ -324,8 +338,8 @@ Scope.prototype.$destroy = function () {
 		var siblings = this.$parent.$$children;
 		var indexOfThis = siblings.indexOf(this);
 		
-		if (indextOfThis >= 0) {
-			siblings.splice(indextOfThis, 1);
+		if (indexOfThis >= 0) {
+			siblings.splice(indexOfThis, 1);
 		}
 	}
 	
@@ -347,7 +361,7 @@ Scope.prototype.$watchCollection = function (watchFn, listenerFn) {
 		newValue = watchFn(scope);
 		
 		if (_.isObject(newValue)) {
-			if(_.isArrayLike(newValue)) {
+			if(isArrayLike(newValue)) {
 				if(!_.isArray(oldValue)) {
 					changeCount++;
 					oldValue = [];
@@ -368,7 +382,7 @@ Scope.prototype.$watchCollection = function (watchFn, listenerFn) {
 				});
 			} else {
 				//detect when an attribute becomes an object
-				if (!_.isObject(oldValue) || _.isArrayLike(oldValue)) {
+				if (!_.isObject(oldValue) || isArrayLike(oldValue)) {
 					changeCount++;
 					oldValue = {};
 					oldLength = 0;
@@ -519,3 +533,5 @@ Scope.prototype.$$fireEventOnScope = function (eventName, listenerArgs) {
 		}
 	}
 };
+
+module.exports = Scope;
