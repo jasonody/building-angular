@@ -255,7 +255,7 @@ Scope.prototype.$watchGroup = function (watchFns, listenerFn) {
 			
 			shouldCall = false;
 		};
-	};
+	}
 	
 	function watchGroupListener () { 
 	
@@ -267,7 +267,7 @@ Scope.prototype.$watchGroup = function (watchFns, listenerFn) {
 		}
 		
 		changeReactionScheduled = false;
-	};
+	}
 	
 	var destroyFns = watchFns.map(function (watchFn, i) {
 		

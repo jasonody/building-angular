@@ -226,7 +226,7 @@ describe('Scope', function () {
 			
 			scope.$watch(
 				function () { return scope.number; },
-				function (newValue, oldValue, scope) { scope.counter++ }
+				function (newValue, oldValue, scope) { scope.counter++; }
 			);
 			
 			scope.$digest();
@@ -849,7 +849,7 @@ describe('Scope', function () {
 
 			scope.counter = 0;
 			scope.aValue = 1;
-			scope.anotherValue = 2
+			scope.anotherValue = 2;
 
 			var destroyGroup = scope.$watchGroup([
 				function (scope) { return scope.aValue; },
