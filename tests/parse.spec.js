@@ -81,8 +81,22 @@ describe('parse', function () {
 		expect(fn()).toEqual('abc');
 	});
 	
-	fit('will not parse a string with mismatching quotes', function () {
+	it('will not parse a string with mismatching quotes', function () {
 		
 		expect(function () { parse('"abc\''); }).toThrow();
+	});
+	
+	it('can parse a string with a single quote inside', function () {
+		
+		var fn = parse("'a\\\'b'");
+		
+		expect(fn()).toEqual('a\'b');
+	});
+	
+	it('can parse a string with a double quote inside', function () {
+		
+		var fn = parse('"a\\\"b"');
+		
+		expect(fn()).toEqual('a\"b');
 	});
 });
