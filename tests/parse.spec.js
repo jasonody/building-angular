@@ -80,4 +80,9 @@ describe('parse', function () {
 		
 		expect(fn()).toEqual('abc');
 	});
+	
+	fit('will not parse a string with mismatching quotes', function () {
+		
+		expect(function () { parse('"abc\''); }).toThrow();
+	});
 });
