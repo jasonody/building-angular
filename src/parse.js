@@ -1,5 +1,7 @@
 'use strict';
 
+var _ = require('lodash');
+
 function parse (expr) {
 	
 	var lexer = new Lexer();
@@ -24,6 +26,8 @@ Lexer.prototype.lex = function (text) {
 		if (this.isNumber(this.ch) ||
 				(this.ch === '.' && this.isNumber(this.peek()))) {
 			this.readNumber();
+		} else if (this.ch === '\'' || this.ch === '"') {
+			this.readString();
 		} else {
 			throw 'Unexpected next character ' + this.ch;
 		}
@@ -80,6 +84,32 @@ Lexer.prototype.peek = function () {
 Lexer.prototype.isExpOperator = function (ch) {
 	
 	return ch === '-' || ch === '+' ||  this.isNumber(ch);
+};
+
+Lexer.prototype.readString = function () {
+	
+	this.index++;
+	var string = '';
+	
+	while (this.index < this.text.length) {
+		var ch = this.text.charAt(this.index);
+		
+		if (ch === '\'' || ch ==='"') {
+			this.index++;
+			this.tokens.push({
+				text: string,
+				value: string
+			});
+			
+			return;
+		} else {
+			string += ch;
+		}
+		
+		this.index++;
+	}
+	
+	throw 'Unmatched quote';
 };
 
 function AST (lexer) {
@@ -141,7 +171,18 @@ ASTCompiler.prototype.recurse = function (ast) {
 			break;
 			
 		case AST.Literal:
-			return ast.value;
+			return this.escape(ast.value);
+	}
+};
+
+ASTCompiler.prototype.escape = function (value) {
+	
+	if (_.isString(value)) {
+		
+		return '\'' + value + '\'';
+	} else {
+		
+		return value;
 	}
 };
 
