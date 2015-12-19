@@ -99,4 +99,16 @@ describe('parse', function () {
 		
 		expect(fn()).toEqual('a\"b');
 	});
+	
+	fit('will parse a string with a unicode escape', function () {
+		
+		var fn = parse('"\\u00A0"');
+		
+		expect(fn()).toEqual('\u00A0');
+	});
+	
+	fit('will not parse a string with an invalid unicode escpae', function () {
+		
+		expect(function () { parse('"\\u00T0"'); }).toThrow();
+	});
 });
