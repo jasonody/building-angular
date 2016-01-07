@@ -12,7 +12,7 @@ describe('parse', function () {
 		expect(fn()).toBe(42);
 	});
 	
-	it('can parse a floating point number', function () {
+	fit('can parse a floating point number', function () {
 		
 		var fn = parse('4.2');
 		
@@ -131,5 +131,12 @@ describe('parse', function () {
 		var fn = parse('false');
 		
 		expect(fn()).toBe(false);
+	});
+	
+	it('ignores whitespace', function () {
+		
+		var fn = parse(' \n42');
+		
+		expect(fn()).toEqual(42);
 	});
 });
