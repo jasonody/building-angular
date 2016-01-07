@@ -55,7 +55,7 @@ Lexer.prototype.readNumber = function () {
 	while (this.index < this.text.length) {
 		var ch = this.text.charAt(this.index).toLowerCase();
 		
-		if (this.ch === '.' || this.isNumber(ch)) {
+		if (ch === '.' || this.isNumber(ch)) {
 				number += ch;
 		} else {
 			var nextCh = this.peek();

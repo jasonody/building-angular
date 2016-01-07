@@ -12,7 +12,7 @@ describe('parse', function () {
 		expect(fn()).toBe(42);
 	});
 	
-	fit('can parse a floating point number', function () {
+	it('can parse a floating point number', function () {
 		
 		var fn = parse('4.2');
 		
